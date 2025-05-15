@@ -2,27 +2,48 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>M24 ABD-Tool GUI Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>M24 ABD-Tool Diagnose GUI (Pro)</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-  <h1>M24 ABD-Tool Diagnose-Frontend</h1>
+<body class="p-4">
+  <div class="container">
+    <h1 class="mb-4">🚀 M24 ABD-Tool Diagnose GUI (Pro)</h1>
 
-  <button onclick="uploadVorgang()">Vorgang hochladen</button>
-  <button onclick="listVorgaenge()">Vorgänge anzeigen</button>
-  <input id="downloadId" placeholder="Vorgang-ID für Download" />
-  <button onclick="downloadVorgang()">Download testen</button>
+    <div class="mb-3">
+      <button class="btn btn-primary" onclick="uploadVorgang()">Vorgang hochladen</button>
+      <button class="btn btn-success" onclick="listVorgaenge()">Vorgänge anzeigen</button>
+    </div>
 
-  <pre id="output"></pre>
+    <div class="mb-3">
+      <input class="form-control mb-2" id="downloadId" placeholder="Vorgang-ID für Download">
+      <button class="btn btn-warning" onclick="downloadVorgang()">Download testen</button>
+    </div>
+
+    <div id="output" class="bg-light p-3 rounded border" style="height: 300px; overflow-y: auto; white-space: pre-wrap;"></div>
+
+    <h3 class="mt-4">📄 PDF Vorschau</h3>
+    <iframe id="pdfViewer" style="width: 100%; height: 600px; border: 1px solid #ddd;"></iframe>
+  </div>
 
   <script>
     const API_URL = 'https://m24-abd-api-backend.onrender.com';
 
-    function output(msg) {
-      document.getElementById('output').textContent += msg + "\n";
+    function log(msg, type = 'info') {
+      const color = {
+        info: 'black',
+        success: 'green',
+        error: 'red',
+        warning: 'orange'
+      }[type] || 'black';
+
+      const output = document.getElementById('output');
+      output.innerHTML += `<span style="color:${color}">${msg}</span>\n`;
+      output.scrollTop = output.scrollHeight;
     }
 
     function uploadVorgang() {
-      output('➡️ Upload Vorgang...');
+      log('➡️ Upload Vorgang...', 'info');
       fetch(API_URL + '/api/vorgang', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -35,39 +56,45 @@
       })
       .then(r => r.json())
       .then(data => {
-        output('✅ Vorgang hochgeladen: ' + data.id);
+        log(`✅ Vorgang hochgeladen: ${data.id}`, 'success');
         document.getElementById('downloadId').value = data.id;
       })
-      .catch(err => output('❌ Fehler: ' + err));
+      .catch(err => log('❌ Fehler: ' + err, 'error'));
     }
 
     function listVorgaenge() {
-      output('➡️ Abrufen Vorgangsliste...');
+      log('➡️ Abrufen Vorgangsliste...', 'info');
       fetch(API_URL + '/api/vorgaenge')
         .then(r => r.json())
-        .then(data => output(JSON.stringify(data, null, 2)))
-        .catch(err => output('❌ Fehler: ' + err));
+        .then(data => log(JSON.stringify(data, null, 2), 'info'))
+        .catch(err => log('❌ Fehler: ' + err, 'error'));
     }
 
     function downloadVorgang() {
       const id = document.getElementById('downloadId').value;
       if (!id) {
-        output('❌ Bitte Vorgang-ID eingeben!');
+        log('❌ Bitte Vorgang-ID eingeben!', 'warning');
         return;
       }
-      output('➡️ Download-Test für ID: ' + id);
+      log(`➡️ Download-Test für ID: ${id}`, 'info');
       fetch(API_URL + '/api/download/' + id)
         .then(r => {
           if (r.status === 200) {
-            output('✅ Download erfolgreich (Fake-PDF)');
             return r.blob();
           } else if (r.status === 404) {
-            output('❌ Download antwortet mit 404 – Vorgang nicht gefunden oder Route fehlerhaft.');
+            log('❌ Download antwortet mit 404 – Vorgang nicht gefunden oder Route fehlerhaft.', 'error');
+            throw new Error('404');
           } else {
-            output('❌ Download Fehler: ' + r.status);
+            log(`❌ Download Fehler: ${r.status}`, 'error');
+            throw new Error(r.status);
           }
         })
-        .catch(err => output('❌ Fehler: ' + err));
+        .then(blob => {
+          const url = URL.createObjectURL(blob);
+          document.getElementById('pdfViewer').src = url;
+          log('✅ Download erfolgreich (Vorschau aktualisiert)', 'success');
+        })
+        .catch(err => console.log('❌ Fehler: ' + err));
     }
   </script>
 </body>
