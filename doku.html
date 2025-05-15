@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>M24 ABD-Tool Diagnose GUI – Dokumentation</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="p-4">
+  <div class="container">
+    <h1>📑 M24 ABD-Tool Diagnose GUI – Dokumentation</h1>
+
+    <p class="lead">Diese Seite dokumentiert alle Funktionen der Diagnose-GUI (Pro-Version). Die GUI dient ausschließlich zur internen Diagnose, Test und Monitoring der ABD-API auf Render.</p>
+
+    <h2>Funktionen</h2>
+    <ul>
+      <li><strong>API Status Dashboard:</strong> Überwacht API online/offline, zeigt Gesamtanzahl Vorgänge, letzten MRN und Empfänger (Live Refresh alle 10 Sekunden).</li>
+      <li><strong>Vorgang hochladen:</strong> Testet Upload eines neuen Vorgangs. MRN und Empfänger sind statisch, nur für Tests.</li>
+      <li><strong>Vorgänge anzeigen:</strong> Holt alle Vorgänge und zeigt sie als JSON im Logfenster.</li>
+      <li><strong>Download testen:</strong> Testet, ob die API den gewählten Vorgang als PDF (Platzhalter) ausliefert. Vorschau direkt im iframe.</li>
+      <li><strong>Lokaler PDF-Generator:</strong> Generiert eine statische Beispiel-PDF direkt im Browser (kein Backend nötig).</li>
+    </ul>
+
+    <h2>Technologie</h2>
+    <ul>
+      <li><strong>Frontend:</strong> Bootstrap 5, Vanilla JavaScript</li>
+      <li><strong>API URL:</strong> <code>https://m24-abd-api-backend.onrender.com</code></li>
+      <li><strong>Deployment:</strong> Render Static Site (<code>M24-ABD-Diagnose-GUI</code>)</li>
+    </ul>
+
+    <h2>Hinweise</h2>
+    <ul>
+      <li>Diese GUI ersetzt vollständig die Terminal-Scripts (Curl, Bash).</li>
+      <li>Sie zeigt nur Diagnose-Funktionalität, keine produktive Anwendung!</li>
+      <li>API-Monitoring läuft clientseitig über einfache Fetch-Requests.</li>
+    </ul>
+
+    <h2>Seiten</h2>
+    <ul>
+      <li><a href="index.html" class="btn btn-primary">🔗 Zur Diagnose GUI (Pro Version)</a></li>
+      <li><a href="doku.html" class="btn btn-outline-secondary">📑 Zu dieser Dokumentation</a></li>
+    </ul>
+
+    <footer class="mt-4 text-muted">
+      Stand: Mai 2025 – M24 ABD Tool Diagnose GUI
+    </footer>
+  </div>
+</body>
+</html>
