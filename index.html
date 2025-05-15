@@ -10,6 +10,14 @@
   <div class="container">
     <h1 class="mb-4">🚀 M24 ABD-Tool Diagnose GUI (Pro)</h1>
 
+    <h2 class="mt-4">📊 Dashboard</h2>
+    <div id="dashboard" class="bg-white border rounded p-3 mb-4">
+      <p><strong>Status API:</strong> <span id="apiStatus" class="badge bg-secondary">Unbekannt</span></p>
+      <p><strong>Vorgänge gesamt:</strong> <span id="totalVorgaenge">-</span></p>
+      <p><strong>Letzter MRN:</strong> <span id="lastMrn">-</span></p>
+      <p><strong>Letzter Empfänger:</strong> <span id="lastEmpfaenger">-</span></p>
+    </div>
+
     <div class="mb-3">
       <button class="btn btn-primary" onclick="uploadVorgang()">Vorgang hochladen</button>
       <button class="btn btn-success" onclick="listVorgaenge()">Vorgänge anzeigen</button>
@@ -96,6 +104,55 @@
         })
         .catch(err => console.log('❌ Fehler: ' + err));
     }
+
+    function refreshDashboard() {
+  fetch(API_URL + '/api/vorgaenge')
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById('apiStatus').className = 'badge bg-success';
+      document.getElementById('apiStatus').textContent = 'Online';
+      document.getElementById('totalVorgaenge').textContent = data.length;
+      if (data.length > 0) {
+        document.getElementById('lastMrn').textContent = data[0].mrn;
+        document.getElementById('lastEmpfaenger').textContent = data[0].empfaenger;
+      } else {
+        document.getElementById('lastMrn').textContent = '-';
+        document.getElementById('lastEmpfaenger').textContent = '-';
+      }
+    })
+    .catch(err => {
+      document.getElementById('apiStatus').className = 'badge bg-danger';
+      document.getElementById('apiStatus').textContent = 'Offline';
+      console.error('Dashboard Fehler:', err);
+    });
+}
+
+// Automatisch alle 10 Sekunden refreshen
+setInterval(refreshDashboard, 10000);
+refreshDashboard();
+
   </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+function generatePDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  doc.setFontSize(18);
+  doc.text("M24 ABD-Tool - Vorgangsdokument", 20, 20);
+
+  doc.setFontSize(12);
+  doc.text("MRN: TEST123", 20, 40);
+  doc.text("Empfänger: Test GmbH", 20, 50);
+  doc.text("Land: DE", 20, 60);
+  doc.text("Waren: Testwaren", 20, 70);
+  doc.text("Status: offen", 20, 80);
+
+  doc.save("vorgang.pdf");
+}
+</script>
+<button class="btn btn-outline-secondary mt-3" onclick="generatePDF()">📄 Generiere PDF lokal</button>
+
 </body>
 </html>
