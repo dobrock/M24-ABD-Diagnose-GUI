@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>M24 ABD-Tool GUI Test</title>
+</head>
+<body>
+  <h1>M24 ABD-Tool Diagnose-Frontend</h1>
+
+  <button onclick="uploadVorgang()">Vorgang hochladen</button>
+  <button onclick="listVorgaenge()">Vorgänge anzeigen</button>
+  <input id="downloadId" placeholder="Vorgang-ID für Download" />
+  <button onclick="downloadVorgang()">Download testen</button>
+
+  <pre id="output"></pre>
+
+  <script>
+    const API_URL = 'https://m24-abd-api-backend.onrender.com';
+
+    function output(msg) {
+      document.getElementById('output').textContent += msg + "\n";
+    }
+
+    function uploadVorgang() {
+      output('➡️ Upload Vorgang...');
+      fetch(API_URL + '/api/vorgang', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mrn: 'TEST123',
+          empfaenger: 'Test GmbH',
+          land: 'DE',
+          waren: 'Testwaren'
+        })
+      })
+      .then(r => r.json())
+      .then(data => {
+        output('✅ Vorgang hochgeladen: ' + data.id);
+        document.getElementById('downloadId').value = data.id;
+      })
+      .catch(err => output('❌ Fehler: ' + err));
+    }
+
+    function listVorgaenge() {
+      output('➡️ Abrufen Vorgangsliste...');
+      fetch(API_URL + '/api/vorgaenge')
+        .then(r => r.json())
+        .then(data => output(JSON.stringify(data, null, 2)))
+        .catch(err => output('❌ Fehler: ' + err));
+    }
+
+    function downloadVorgang() {
+      const id = document.getElementById('downloadId').value;
+      if (!id) {
+        output('❌ Bitte Vorgang-ID eingeben!');
+        return;
+      }
+      output('➡️ Download-Test für ID: ' + id);
+      fetch(API_URL + '/api/download/' + id)
+        .then(r => {
+          if (r.status === 200) {
+            output('✅ Download erfolgreich (Fake-PDF)');
+            return r.blob();
+          } else if (r.status === 404) {
+            output('❌ Download antwortet mit 404 – Vorgang nicht gefunden oder Route fehlerhaft.');
+          } else {
+            output('❌ Download Fehler: ' + r.status);
+          }
+        })
+        .catch(err => output('❌ Fehler: ' + err));
+    }
+  </script>
+</body>
+</html>
